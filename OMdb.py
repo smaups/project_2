@@ -12,7 +12,7 @@ import pprint
 mojo_dff = pd.read_csv('data/annual_mojo.csv')
 
 
-mojo_df = mojo_dff[mojo_dff['bo_year_rank'] <6].reset_index()
+mojo_df = mojo_dff[mojo_dff['bo_year_rank'] <101].reset_index()
 
 # print(mojo_df)
 mojo_title = mojo_df.title
@@ -25,8 +25,8 @@ print(len(mojo_year))
 
 omdb_data = []
 base_url = 'http://www.omdbapi.com/'
-
-for i in range(len(mojo_title)):
+print(len(mojo_title)-1649)
+for i in range(len(mojo_title)-1649):
     print(mojo_title[i])
     try:
         url = base_url +'?apikey=' + omdb_api_b + '&t=' + str(mojo_title[i]) + '&y=' + str(mojo_year[i])
@@ -37,24 +37,31 @@ for i in range(len(mojo_title)):
     except KeyError:
         print("OMdb does not have this title"+ mojo_title[i])
 
-# for i in range(len(mojo_title)):  
-#     try:
-#         url = base_url +'?apikey=' + omdb_api_l + '&t=' + str(mojo_title[i+990]) + '&y=' + str(mojo_year[i+990]) 
-#         request = requests.get(url)
-#         results = json.loads(request.text)
-#         print(json.dumps(results, indent=4))
-#         omdb_data.append(results)
-#     except KeyError:
-#         print("OMdb does not have this title" mojo[i+990])
+for i in range(len(mojo_title)- 1649):
+    print(mojo_title[i+825])  
+    try:
+        url = base_url +'?apikey=' + omdb_api_l + '&t=' + str(mojo_title[i+825]) + '&y=' + str(mojo_year[i+825]) 
+        request = requests.get(url)
+        results = json.loads(request.text)
+        print(json.dumps(results, indent=4))
+        omdb_data.append(results)
+    except KeyError:
+        print("OMdb does not have this title" mojo[i+825])
 
-# for i in range(len(mojo_title)):    
-#     url = base_url +'?apikey=' + omdb_api + '&t=' + str(mojo_title[i+1980]) + '&y=' + str(mojo_year[i+1980])
-#     request = requests.get(url)
-#     results = json.loads(request.text)
-#     print(json.dumps(results, indent=4))
-#     omdb_data.append(results) 
-# omdb_df = pd.DataFrame(omdb_data)
-# print(omdb_df.head())
+for i in range(len(mojo_title)- 1649): 
+    print(mojo_title[i+ 1649])   
+  try:  
+    url = base_url +'?apikey=' + omdb_api + '&t=' + str(mojo_title[i+1649]) + '&y=' + str(mojo_year[i+1649])
+    request = requests.get(url)
+    results = json.loads(request.text)
+    print(json.dumps(results, indent=4))
+    omdb_data.append(results) 
+except KeyError:
+    print("OMdb does not have this title" mojo[i+825])
+
+
+omdb_df = pd.DataFrame(omdb_data)
+print(omdb_df.head())
 
 
 # def init_browser():

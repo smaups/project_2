@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from splinter import Browser
 from splinter.exceptions import ElementDoesNotExist
+from config import omdb_api_s, omdb_api_b, omdb_api_l
 import requests
 import pandas as pd
 import numpy as np
@@ -8,24 +9,63 @@ import re
 import json
 import pprint
 
-# ['bo_year_rank','title','studio','worldwide-gross','domestic-gross','domestic-pct','overseas-gross','overseas-pct']
-MOJO (API):
-***Search string
-Bo_year
-Title
-Domestic Gross
-Worldwide Gross
+mojo_dff = pd.read_csv('data/annual_mojo.csv')
 
-mojo_df = pd.read_csv('data/annual_mojo.csv')
-# print(mojo_df.head())
 
+mojo_df = mojo_dff[mojo_dff['bo_year_rank'] <6].reset_index()
+
+# print(mojo_df)
 mojo_title = mojo_df.title
 mojo_year = mojo_df.bo_year
-mojo_domestic = mojo_df.domestic-gross
-mojo_worldwide = mojo_df.worldwide-gross
+mojo_domestic = mojo_df['domestic-gross']
+mojo_worldwide = mojo_df['worldwide-gross']
+print(mojo_title[5])
+print(len(mojo_year))
+# obdb_api = [obdb_api_s, obdb_api_l, obdb_api_b]
 
-url = 'http://www.omdbapi.com/'
+omdb_data = []
+base_url = 'http://www.omdbapi.com/'
 
+for i in range(len(mojo_title)):
+    print(mojo_title[i])
+    try:
+        url = base_url +'?apikey=' + omdb_api_b + '&t=' + str(mojo_title[i]) + '&y=' + str(mojo_year[i])
+        request = requests.get(url)
+        results = json.loads(request.text)
+        print(json.dumps(results, indent=4))
+        omdb_data.append(results)
+    except KeyError:
+        print("OMdb does not have this title"+ mojo_title[i])
+
+# for i in range(len(mojo_title)):  
+#     try:
+#         url = base_url +'?apikey=' + omdb_api_l + '&t=' + str(mojo_title[i+990]) + '&y=' + str(mojo_year[i+990]) 
+#         request = requests.get(url)
+#         results = json.loads(request.text)
+#         print(json.dumps(results, indent=4))
+#         omdb_data.append(results)
+#     except KeyError:
+#         print("OMdb does not have this title" mojo[i+990])
+
+# for i in range(len(mojo_title)):    
+#     url = base_url +'?apikey=' + omdb_api + '&t=' + str(mojo_title[i+1980]) + '&y=' + str(mojo_year[i+1980])
+#     request = requests.get(url)
+#     results = json.loads(request.text)
+#     print(json.dumps(results, indent=4))
+#     omdb_data.append(results) 
+# omdb_df = pd.DataFrame(omdb_data)
+# print(omdb_df.head())
+
+
+# def init_browser():
+#     executable_path = {'executable_path': '/usr/local/bin/chromedriver'}
+#     return Browser('chrome', **executable_path, headless=False)
+
+# def api():
+#     base_url = 'http://www.omdbapi.com/'
+#     url = base_url +'?apikey=' + omdb_api + '?t=' + mojo_title[i] + '&y=' + mojo_year[i] 
+#     request = requests.get(url)
+#     omdb_data = json.loads(request.text)
 # def OMdbAPI():
 
 #     mojo_df = pd.read_csv('/data/annual_mojo.csv')

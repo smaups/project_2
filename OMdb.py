@@ -9,6 +9,8 @@ import re
 import json
 import pprint
 
+# def OMdbAPI():
+
 mojo_dff = pd.read_csv('data/annual_mojo.csv')
 
 
@@ -19,15 +21,14 @@ mojo_title = mojo_df.title
 mojo_year = mojo_df.bo_year
 mojo_domestic = mojo_df['domestic-gross']
 mojo_worldwide = mojo_df['worldwide-gross']
-print(mojo_title[5])
-print(len(mojo_year))
-# obdb_api = [obdb_api_s, obdb_api_l, obdb_api_b]
+# print(mojo_title[5])
+# print(len(mojo_year))
 
 omdb_data = []
 base_url = 'http://www.omdbapi.com/'
 print(len(mojo_title)-1649)
 for i in range(len(mojo_title)-1649):
-    print(mojo_title[i])
+    # print(mojo_title[i])
     try:
         url = base_url +'?apikey=' + omdb_api_b + '&t=' + str(mojo_title[i]) + '&y=' + str(mojo_year[i])
         request = requests.get(url)
@@ -46,21 +47,24 @@ for i in range(len(mojo_title)- 1649):
         print(json.dumps(results, indent=4))
         omdb_data.append(results)
     except KeyError:
-        print("OMdb does not have this title" mojo[i+825])
+        print("OMdb does not have this title" + mojo_title[i+825])
 
 for i in range(len(mojo_title)- 1649): 
     print(mojo_title[i+ 1649])   
-  try:  
-    url = base_url +'?apikey=' + omdb_api + '&t=' + str(mojo_title[i+1649]) + '&y=' + str(mojo_year[i+1649])
-    request = requests.get(url)
-    results = json.loads(request.text)
-    print(json.dumps(results, indent=4))
-    omdb_data.append(results) 
-except KeyError:
-    print("OMdb does not have this title" mojo[i+825])
+    try:  
+        url = base_url +'?apikey=' + omdb_api_s + '&t=' + str(mojo_title[i+1649]) + '&y=' + str(mojo_year[i+1649])
+        request = requests.get(url)
+        results = json.loads(request.text)
+        print(json.dumps(results, indent=4))
+        omdb_data.append(results) 
+    except KeyError:
+        print("OMdb does not have this title" + mojo_title[i+825])
 
+with open('OMdb.json', 'w') as omdb_file:
+     json.dump(omdb_data, omdb_file, indent=4)
 
 omdb_df = pd.DataFrame(omdb_data)
+omdb_df.to_csv('./data/OMdb.csv')
 print(omdb_df.head())
 
 

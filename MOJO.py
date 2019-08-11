@@ -18,7 +18,7 @@ def scrape():
     """
     Gets all box office data from 1989 to 2018 from boxofficemojo.com
     """
-    years=[str(a) for a in range(1989,2019)]
+    years=[str(a) for a in range(2000,2019)]
     df_list=[]
     for year in years:
         r=rq.get('https://www.boxofficemojo.com/yearly/chart/?view2=worldwide&yr=%s&p=.htm' % year)

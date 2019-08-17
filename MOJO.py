@@ -4,7 +4,7 @@ import requests as rq
 import re
 import pandas as pd
 import numpy as np
-
+# https://towardsdatascience.com/collecting-movie-data-445ca1ead8e5
 def convdollar(x):
     """
     Just a parsing function converting 2.5k to 2500, 1mil to 1000000

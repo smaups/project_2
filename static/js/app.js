@@ -1,24 +1,49 @@
+function dictionary(list) {
+  var map = {};
+  for (var i = 0; i < list.length; ++i) {
+    var ID = list[i].ID
+    if (!map[ID]) {
+      map[ID] = [];
+      map[ID].push(list[i])
+    } 
+
+  } return map;
+}
+
+
 function buildMetadata(Year) {
   d3.selectAll("p").remove();
   // @TODO: Complete the following function that builds the metadata panel
-  var femaleYRURL = `/female/years/${Year}`;
-  d3.json(femaleYRURL).then(function(data) {
-    var input = d3.select("#female-year");
-      Object.entries(data).forEach(function ([key, value]) {
-        var row = input.append("p");
-        row.text(`${key}: ${value}`);
+  var femaleURL = `/female/years/${Year}`;
+  var input = d3.select("#female-year"); 
+  d3.json(femaleURL).then((data) => {
+    // console.log(data)
+    data.forEach((Help) => {
+      // var row = d3.select("#female-year").append("p");
+      //   row.text(`${Help.Name}`);  
+        buildGauge(Help.Count);
       })
-      buildGauge(data.WFREQ);
-      console.log(data.WFREQ)
-  });
+      
+  
+    // for (var i = 0; i < data.length; ++i) {
+    // var d = dictionary(data)
+    // console.log(d)
+    // var row = input.append("p");
+    // row.text((`${key}`))
+    // }
 
+
+
+
+      
+      // console.log(data)
+  });
+}
     // BONUS: Build the Gauge Chart
 
-    
-}
-function buildGauge(sample) {
+function buildGauge(Year) {
 
-var level = (sample * 20);
+var level = (Year * 20);
 
 var degrees = 180 - level,
   radius = .5;
@@ -77,68 +102,83 @@ yaxis: {zeroline:false, showticklabels:false,
 
 Plotly.newPlot('gauge', data, layout);
 }
+ 
+// d3.json(femaleURL).then((data) => {
+//   console.log(data)
+//   data.forEach((Help) => {
+//     var row = d3.select("#female-year").append("p");
+//       row.text(`${Help.Name}`);  
+//   })
 
 
-function buildCharts(sample) {
-
+function buildCharts(Year) {
+  var Names = []
+  var Counts = []
   // @TODO: Use `d3.json` to fetch the sample data for the plots
-  var sampleURL = `/samples/${sample}`;
-  d3.json(sampleURL).then(function(response){
-    console.log(response)
+  var femaleYRURL = `/female/years/${Year}`;
+  d3.json(femaleYRURL).then((requests) => {
+    requests.forEach((response) => {
+      Names.push(response.Name)
+      Counts.push(response.Count)
     var trace1 = {
-      x: response.otu_ids,
-      y: response.sample_values,
+      x: Names,
+      y: Counts,
       mode: "markers",
-      text: response.otu_labels,
-      marker: { size: response.sample_values,
-      color: response.otu_ids,
+      text: Names,
+      marker: { size: Counts/100,
+      color: Names,
       colorscale: 'Earth'}
-    }
-    var data1 = [trace1]
-    
+    } 
+    var data1 = [trace1]   
     Plotly.newPlot("bubble", data1);
+    
+  }) 
 
-    var topValues = response.sample_values.slice(0,10);
-    var topLabels = response.otu_labels.slice(0,10);
-    var topIDs = response.otu_ids.slice(0,10);
-    console.log(topValues)
-    var trace2 = {
-      values: topValues,
-      labels: topIDs,
-      hovertext: topLabels,
-      hoverinfo: 'hovertext',
-      type: "pie"
-    }
-    var data2 = [trace2]
-
-    Plotly.newPlot("pie", data2)
-  })
+})
 }
+
+    // var topValues = response.Count.slice(0,10);
+    // var topLabels = response.Name.slice(0,10);
+    // var topIDs = response.Rank.slice(0,10);
+    // // console.log(topVsalues)
+    // var trace2 = {
+    //   values: topValues,
+    //   labels: topIDs,
+    //   hovertext: topLabels,
+    //   hoverinfo: 'hovertext',
+    //   type: "pie"
+    // }
+    // var data2 = [trace2]
+
+    // Plotly.newPlot("pie", data2)
+  
+
 
 function init() {
   // Grab a reference to the dropdown select element
   var selector = d3.select("#selDataset");
   console.log(selector);
   // Use the list of sample names to populate the select options
-  d3.json("/names").then((sampleNames) => {
-    sampleNames.forEach((sample) => {
+  d3.json("/female/years").then((femaleYears) => { 
+    console.log(femaleYears)
+    femaleYears.forEach((Year) => {
       selector
         .append("option")
-        .text(sample)
-        .property("value", sample);
+        .text(Year)
+        .property("value", Year);
     });
 
     // Use the first sample from the list to build the initial plots
-    const firstSample = sampleNames[0];
-    buildCharts(firstSample);
-    buildMetadata(firstSample);
+    const firstYear = femaleYears;
+    buildCharts(firstYear);
+    buildMetadata(firstYear);
   });
 }
 
-function optionChanged(newSample) {
+function optionChanged(newYear) {
   // Fetch new data each time a new sample is selected
-  buildCharts(newSample);
-  buildMetadata(newSample);
+  buildCharts(newYear);
+  buildMetadata(newYear);
 }
 
 // Initialize the dashboard

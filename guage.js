@@ -14,89 +14,94 @@
 // }
 function handleSubmit() {
   // Prevent the page from refreshing
-  d3.event.preventDefault();
+  // d3.event.preventDefault();
 
   // Select the input value from the form
+  var nameselector = d3.select("#selNAMEDataset");
+  nameselector.selectAll("option").remove();
+
   var Year = d3.select("#selYRDataset").node().value;
   console.log(Year);
-
+  
   var femaleURL = `/guagechart/female/${Year}`;
   console.log(femaleURL)
   d3.json(femaleURL).then((data) => {
-  var nameselector = d3.select("#selNAMEDataset");
+
   data.Names.forEach((Names) => {
     nameselector
         .append("option")
         .text(Names)
         .property("value", Names);
   })
-
+  var Femaleguage = nameselector.node().value
   // Build the plot with the new stock
-  buildGauge(Year);
+  buildGauge(Femaleguage);
 })
 
 }
-// function buildGauge(sample) {
-
-// var level = (sample * 20);
-
-// var degrees = 180 - level,
-//   radius = .5;
-// var radians = degrees * Math.PI / 180;
-// var x = radius * Math.cos(radians);
-// var y = radius * Math.sin(radians);
-
-// var mainPath = 'M -.0 -0.025 L .0 0.025 L ',
-//      pathX = String(x),
-//      space = ' ',
-//      pathY = String(y),
-//      pathEnd = ' Z';
-// var path = mainPath.concat(pathX,space,pathY,pathEnd);
+function buildGauge(Name) {
+console.log(Name)
 
 
-// var data = [{ type: 'scatter',
-// x: [0], y:[0],
-//  marker: {size: 28, color:'850000'},
-//  showlegend: false,
-//  name: 'Frequency of Washes',
-//  text: level,
-//  hoverinfo: 'text+name'},
-// { values: [50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50],
-// rotation: 90,
-// text: ['8-9', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3',
-//          '1-2', '0-1', ''],
-// textinfo: 'text',
-// textposition:'inside',
-// marker: {colors:[ 'rgba(0,128,0, .9)', 'rgba(0,128,0, .8)', 'rgba(0,128, 0, .7)', 
-//                   'rgba(0,128, 0, .6)', 'rgba(0,128, 0, .5)',	'rgba(0,128, 0, .4)',
-//                   'rgba(0,128, 0, .3)', 'rgba(0,128, 0, .2)', 'rgba(0,128, 0, .1)',
-//                   'rgba(255, 255, 255, 0)']},
-// labels: ['8-9', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3',
-// '1-2', '0-1', ''],
-// hoverinfo: 'label',
-// hole: .5,
-// type: 'pie',
-// showlegend: false
-// }];
+var level = (Name.Number * 7.2);
 
-// var layout = {
-// shapes:[{
-//    type: 'path',
-//    path: path,
-//    fillcolor: '850000',
-//    line: {
-//      color: '850000'
-//    }
-//  }],
-// title: '<b>Frequency of Belly Button Washing</b> <br> Washes per Week',
-// xaxis: {zeroline:false, showticklabels:false,
-//           showgrid: false, range: [-1, 1]},
-// yaxis: {zeroline:false, showticklabels:false,
-//           showgrid: false, range: [-1, 1]}
-// };
+var degrees = 180 - level,
+  radius = .5;
+var radians = degrees * Math.PI / 180;
+var x = radius * Math.cos(radians);
+var y = radius * Math.sin(radians);
 
-// Plotly.newPlot('gauge', data, layout);
-// }
+var mainPath = 'M -.0 -0.025 L .0 0.025 L ',
+     pathX = String(x),
+     space = ' ',
+     pathY = String(y),
+     pathEnd = ' Z';
+var path = mainPath.concat(pathX,space,pathY,pathEnd);
+
+
+var data = [{ type: 'scatter',
+x: [0], y:[0],
+ marker: {size: 28, color:'850000'},
+ showlegend: false,
+ name: 'Movies',
+ text: level,
+ hoverinfo: 'text+name'},
+{ values: [50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50],
+rotation: 90,
+text: ['8-9', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3',
+         '1-2', '0-1', ''],
+textinfo: 'text',
+textposition:'inside',
+marker: {colors:[ 'rgba(0,128,0, .9)', 'rgba(0,128,0, .8)', 'rgba(0,128, 0, .7)', 
+                  'rgba(0,128, 0, .6)', 'rgba(0,128, 0, .5)',	'rgba(0,128, 0, .4)',
+                  'rgba(0,128, 0, .3)', 'rgba(0,128, 0, .2)', 'rgba(0,128, 0, .1)',
+                  'rgba(255, 255, 255, 0)']},
+labels: ['8-9', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3',
+'1-2', '0-1', ''],
+hoverinfo: 'label',
+hole: .5,
+type: 'pie',
+showlegend: false
+}];
+
+var layout = {
+shapes:[{
+   type: 'path',
+   path: path,
+   fillcolor: '850000',
+   line: {
+     color: '850000'
+   }
+ }],
+title: '<b>Frequency of Belly Button Washing</b> <br> Washes per Week',
+xaxis: {zeroline:false, showticklabels:false,
+          showgrid: false, range: [-1, 1]},
+yaxis: {zeroline:false, showticklabels:false,
+          showgrid: false, range: [-1, 1]}
+};
+
+Plotly.newPlot('gauge', data, layout);
+}
 
 
 // function buildCharts(sample) {
@@ -137,7 +142,7 @@ function handleSubmit() {
 
 function init() {
   // Grab a reference to the dropdown select element
-  var selector = d3.select("#selDataset");
+  var selector = d3.select("#selYRDataset");
   console.log(selector);
   // Use the list of sample names to populate the select options
   d3.json("/years/").then((yearData) => {
@@ -149,17 +154,18 @@ function init() {
     });
 
     // Use the first sample from the list to build the initial plots
-    const firstSample = sampleNames[0];
+    const firstYear = yearData[0];
     // buildCharts(firstSample);
     // buildMetadata(firstSample);
 
-    d3.select("#selYRDataset")(".option").on("change", handleSubmit);
+    d3.select("#selYRDataset").on("change", handleSubmit);
   });
 }
 
-function optionChanged(newSample) {
-  console.log(newSample)
+function optionChanged(newYear) {
+  console.log(newYear)
   // Fetch new data each time a new sample is selected
+  handleSubmit(newYear)
   // buildCharts(newSample);
   // buildMetadata(newSample);
 }

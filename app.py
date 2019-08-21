@@ -18,7 +18,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite://////Users/samanthamaupin/Desktop/DABCHW/Project_2/project_local/names_data.sqlite'
+app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite://///////Users/samanthamaupin/Desktop/DABCHW/Project_2/project_local/data/popular_names.sqlite'
 
 db = SQLAlchemy(app)
 
@@ -30,40 +30,84 @@ Girl_Names = Base.classes.femalenames
 Boy_Names = Base.classes.malenames
 Movies = Base.classes.movies
 
-# Movies.Column['ID'].type = sqlalchemy.sql.sqltypes.DATETIME()
-
-# from sqlalchemy import inspect
-# inspector = inspect(db.engine)
-# print(inspector.get_table_names())
-# columns = inspector.get_columns('movies')
-# for c in columns:
-#     print(c['name'], c["type"])
-
-
-# Movies = Table('Movies', metadata,
-# Column('ID', Integer, primary_key=True),
-# Column('Characters', String),
-# Column("Actors", String),
-# Column("Director", String),
-# Column("Genre", String),
-# Column('Metascore', Integer),
-# Column("Poster", String),
-# Column("Title", String),
-# Column("Writer", String),ID,
-# Column('Year', Integer),
-# Column("imdbID", String),
-# Column('imdbRating', Integer),
-# Column('imdbVotes', Integer),
-#  autoload_with=db.engine)
-
-
 @app.route("/")
 def index():
-    """Return the homepage."""
+    """/guagechart/male/<Year>/"""
+    """/guagechart/female/<Year>/"""
+    """/comparison/<Movie_Year>/<Baby_Year>"""
+    """/male/names/<Year>"""
+    """/female/names/<Year>"""
+    """/number/unique/babynames"""
+    """/all/femalenames"""
+    """/all/malenames"""
+    """/years/"""
     return render_template("index.html")
 
-@app.route("/female/years/<Year>")
-def femaleyears(Year):
+@app.route("/years/")
+def years():
+    results = db.session.query('DISTINCT Year FROM femalenames').all()
+    # Create a dictionary entry for each row of metadata information
+    baby_something = []    
+    for result in results:
+        babynames_metadata = {}
+        baby_something.append(result[0])
+    print(baby_something)
+    return jsonify(baby_something)
+
+@app.route("/all/malenames")
+def maleNAMES():
+    """Return a list of colums."""
+    sel = [
+        Boy_Names.Name,
+    ]
+    results = db.session.query(*sel).all()
+    # Create a dictionary entry for each row of metadata information
+    malenames = []    
+    for result in results:
+        malenames.append(result[0])
+    
+    string = str(malenames)
+    # .repalce("'", "").replace(",", ""))
+    males = string.replace("'", "").replace(",", "")
+    print(males)
+    
+    return jsonify(males)
+
+@app.route("/all/femalenames")
+def femaleNames():
+    """Return a list of colums."""
+    """Return a list of colums."""
+    sel = [
+        Girl_Names.Name,
+    ]
+    results = db.session.query(*sel).filter(Girl_Names.Rank > 24).all()
+    # Create a dictionary entry for each row of metadata information
+    femalenames = []    
+    for result in results:
+        femalenames.append(result[0])
+    
+    string = str(femalenames)
+    # .repalce("'", "").replace(",", ""))
+    females = string.replace("'", "").replace(",", "")
+    print(females)
+    
+    return jsonify(females)
+
+@app.route("/number/unique/babynames")
+def uniquemaleNAMES():
+    """Return a list of colums."""
+    Mresults = db.session.query('DISTINCT Name FROM malenames').all()
+    # Create a dictionary entry for each row of metadata information
+    Fresults = db.session.query('DISTINCT Name FROM femalenames').all()
+    unique = {
+        "Unique Boy Baby Names" : len(Mresults),
+        "Unique Girl Baby Names" : len(Fresults)
+    }
+    return jsonify(unique)
+
+
+@app.route("/female/names/<Year>")
+def femalenamesbyyear(Year):
     """Return a list of colums."""
     sel = [
         Girl_Names.ID,
@@ -91,8 +135,8 @@ def femaleyears(Year):
     print(baby_something)
     return jsonify(baby_something)
 
-@app.route("/male/years/<Year>")
-def maleyears(Year):
+@app.route("/male/names/<Year>")
+def malenamesbyyears(Year):
     """Return a list of colums."""
     sel = [
         Boy_Names.ID,
@@ -119,64 +163,220 @@ def maleyears(Year):
         baby_something.append(babynames_metadata)
     print(baby_something)
     return jsonify(baby_something)
-@app.route("/female/years")
-def femaleYRS():
-    """Return a list of colums."""
-    # sel = [
-    #     Girl_Names.ID,
-    #     Girl_Names.Name,
-    #     Girl_Names.Year,
-    #     Girl_Names.Gender,
-    #     Girl_Names.Count,
-    #     Girl_Names.Rank
-    # ]
 
-    results = db.session.query('DISTINCT Year FROM femalenames').all()
 
-    # Create a dictionary entry for each row of metadata information
-    baby_something = []
-    
-    for result in results:
-        babynames_metadata = {}
-        # babynames_metadata["Id"] = result[0]
-        # babynames_metadata["Name"] = result[1]
-        # babynames_metadata["Year"] = result[0]
-        # babynames_metadata["Gender"] = result[3]
-        # babynames_metadata["Count"] = int(result[4])
-        # babynames_metadata["Rank"] = int(result[5])
-        baby_something.append(result[0])
-    print(baby_something)
-    return jsonify(baby_something)
-
-@app.route("/male/years")
-def maleYRS():
+@app.route("/comparison/<Movie_Year>/<Baby_Year>")
+def comparisoncharts(Movie_Year, Baby_Year):
     """Return a list of colums."""
     sel = [
+        Movies.ID,
+        Movies.Characters,
+        Movies.Actors,
+        Movies.Poster,
+        Movies.Title,
+        Movies.Year,
+        Movies.imdbID,
+    ]
+    selF = [
         Girl_Names.ID,
         Girl_Names.Name,
         Girl_Names.Year,
-        Girl_Names.Gender,
-        Girl_Names.Count,
-        Girl_Names.Rank
     ]
-
-    results = db.session.query(*sel).filter(Boy_Names.Gender == "M").all()
-
-    # Create a dictionary entry for each row of metadata information
-    baby_something = []
+    selM = [
+        Boy_Names.ID,
+        Boy_Names.Name,
+        Boy_Names.Year,
+    ]
+    Mresults = db.session.query(*selM).filter(Boy_Names.Year == Baby_Year).limit(10)
+    Fresults = db.session.query(*selF).filter(Girl_Names.Year == Baby_Year).limit(10)
     
+        # Create a dictionary entry for each row of metadata information
+
+    results = db.session.query(*sel).filter((Movies.Year == Movie_Year)).all()
+    # print(results)
+    movie_something = []
+    Fbaby_something = []
+    Mbaby_something = []
+    MMmovies = []
     for result in results:
+        babynames_metadata = {}
+        MMmovies.append(result[1])
+        babynames_metadata["Id"] = result[0]
+        babynames_metadata["Characters"] = result[1]
+        babynames_metadata["Year"] = result[5]
+        movie_something.append(babynames_metadata)
+
+    for result in Fresults:
         babynames_metadata = {}
         babynames_metadata["Id"] = result[0]
         babynames_metadata["Name"] = result[1]
         babynames_metadata["Year"] = int(result[2])
-        babynames_metadata["Gender"] = result[3]
-        babynames_metadata["Count"] = int(result[4])
-        babynames_metadata["Rank"] = int(result[5])
-        baby_something.append(babynames_metadata)
-    print(baby_something)
-    return jsonify(baby_something)
+        Fbaby_something.append(babynames_metadata)
+    for result in Mresults:
+        babynames_metadata = {}
+        babynames_metadata["Id"] = result[0]
+        babynames_metadata["Name"] = result[1]
+        babynames_metadata["Year"] = int(result[2])
+        Mbaby_something.append(babynames_metadata)
+    # return jsonify(baby_something)
+    graphdata = []
+    fcounter = []
+    mcounter = []
+    print(MMmovies)
+    fname = []
+    mname = []
+    
+    for i in range(len(Fbaby_something)):
+        Fname = Fbaby_something[i]["Name"]
+        count = 0
+        for j in MMmovies:
+            
+            k = j.replace(",", " ")
+            k = k.replace("/", " ")
+            k = k.replace("(", " ")
+            k = k.replace(")", " ")
+            k = str(k).split(" ")
+            if Fname in k:
+                count = count +1
 
+        fcounter.append(count)
+        fname.append(Fname)
+    femalegraphdata = {
+        "Names": fname,
+        "Number": fcounter,
+        "Year": Fbaby_something[0]["Year"]
+}
+    for i in range(len(Mbaby_something)):
+        Mname = Mbaby_something[i]["Name"]
+        count = 0
+        for j in MMmovies:   
+            k = j.replace(",", " ")
+            k = k.replace("/", " ")
+            k = k.replace("(", " ")
+            k = k.replace(")", " ")
+            k = str(k).split(" ")
+            if Mname in k:
+                count = count +1
+
+        mcounter.append(count)
+        mname.append(Mname)
+    malegraphdata = {
+        "Names": mname,
+        "Number": mcounter,
+        "Year": Mbaby_something[0]["Year"]
+}
+
+    graphdata.append(femalegraphdata)
+    graphdata.append(malegraphdata)
+
+    return jsonify(graphdata)
+
+@app.route("/guagechart/female/<Year>/")
+def femaleguageChart(Year):
+    sel = [
+        Girl_Names.Name,
+        Girl_Names.Year
+    ]
+
+    results = db.session.query(*sel).filter(Girl_Names.Year == Year).all()
+    movieResults = db.session.query(Movies.Characters).all()
+
+    movie_something = []
+    Fbaby_something = []
+    MMmovies = []
+    for result in movieResults:
+        babynames_metadata = {}
+        MMmovies.append(result[0])
+        babynames_metadata["Characters"] = result[0]
+        movie_something.append(babynames_metadata)
+
+    for result in results:
+        babynames_metadata = {}
+        babynames_metadata["Name"] = result[0]
+        babynames_metadata["Year"] = int(result[1])
+        Fbaby_something.append(babynames_metadata)
+
+    print(MMmovies)
+
+
+    fcounter = []
+    fname = []
+    
+    for i in range(len(Fbaby_something)):
+        Fname = Fbaby_something[i]["Name"]
+        count = 0
+        for j in MMmovies:
+            
+            k = j.replace(",", " ")
+            k = k.replace("/", " ")
+            k = k.replace("(", " ")
+            k = k.replace(")", " ")
+            k = str(k).split(" ")
+            if Fname in k:
+                count = count +1
+
+        fcounter.append(count)
+        fname.append(Fname)
+    guagedata = {
+        "Names": fname,
+        "Number": fcounter,
+        "Year": Fbaby_something[0]["Year"]}
+    
+    return jsonify(guagedata)
+
+
+@app.route("/guagechart/male/<Year>/")
+def maleguageChart(Year):
+    sel = [
+        Boy_Names.Name,
+        Boy_Names.Year
+    ]
+
+    results = db.session.query(*sel).filter(Boy_Names.Year == Year).all()
+    movieResults = db.session.query(Movies.Characters).all()
+
+    movie_something = []
+    Mbaby_something = []
+    MMmovies = []
+    for result in movieResults:
+        babynames_metadata = {}
+        MMmovies.append(result[0])
+        babynames_metadata["Characters"] = result[0]
+        movie_something.append(babynames_metadata)
+
+    for result in results:
+        babynames_metadata = {}
+        babynames_metadata["Name"] = result[0]
+        babynames_metadata["Year"] = int(result[1])
+        Mbaby_something.append(babynames_metadata)
+
+    print(MMmovies)
+
+
+    mcounter = []
+    mname = []
+    
+    for i in range(len(Mbaby_something)):
+        Mname = Mbaby_something[i]["Name"]
+        count = 0
+        for j in MMmovies:
+            
+            k = j.replace(",", " ")
+            k = k.replace("/", " ")
+            k = k.replace("(", " ")
+            k = k.replace(")", " ")
+            k = str(k).split(" ")
+            if Mname in k:
+                count = count +1
+
+        mcounter.append(count)
+        mname.append(Mname)
+    guagedata = {
+        "Names": mname,
+        "Number": mcounter,
+        "Year": Mbaby_something[0]["Year"]}
+    
+    return jsonify(guagedata)
 
 @app.route("/female/names/<Name>")
 def femalenames(Name):
@@ -204,6 +404,9 @@ def femalenames(Name):
         baby_something.append(babynames_metadata)
     print(baby_something)
     return jsonify(baby_something)
+
+
+
 
 @app.route("/male/names/<Name>")
 def malenames(Name):
@@ -237,7 +440,7 @@ def malenames(Name):
 
 
 @app.route("/baby/years/<Year>")
-def years(Year):
+def babynamesbyyear(Year):
     """Return a list of colums."""
     Msel = [
         Boy_Names.ID,
@@ -422,138 +625,7 @@ def movieyears(Year):
     
     return jsonify(baby_something)
 
-@app.route("/comparison/<Year>/<YEARS>")
-def comparison(Year, YEARS):
-    """Return a list of colums."""
-    sel = [
-        Movies.ID,
-        Movies.Characters,
-        Movies.Actors,
-        Movies.Poster,
-        Movies.Title,
-        Movies.Year,
-        Movies.imdbID,
-    ]
-    selF = [
-        Girl_Names.ID,
-        Girl_Names.Name,
-        Girl_Names.Year,
-        Girl_Names.Gender,
-        Girl_Names.Count,
-        Girl_Names.Rank,
-    ]
-    selM = [
-        Boy_Names.ID,
-        Boy_Names.Name,
-        Boy_Names.Year,
-        Boy_Names.Gender,
-        Boy_Names.Count,
-        Boy_Names.Rank
-    ]
-    Mresults = db.session.query(*selM).filter(Boy_Names.Year == YEARS).limit(10)
-    Fresults = db.session.query(*selF).filter(Girl_Names.Year == YEARS).limit(10)
-    
-        # Create a dictionary entry for each row of metadata information
 
-    results = db.session.query(*sel).filter((Movies.Year == Year)).all()
-    # print(results)
-    movie_something = []
-    Fbaby_something = []
-    Mbaby_something = []
-    MMmovies = []
-    for result in results:
-        babynames_metadata = {}
-        MMmovies.append(result[1])
-        babynames_metadata["Id"] = result[0]
-        babynames_metadata["Characters"] = result[1]
-        babynames_metadata["Actors"] = result[2]
-        babynames_metadata["Poster"] = result[3]
-        babynames_metadata["Title"] = result[4]
-        babynames_metadata["Year"] = result[5]
-        babynames_metadata["imdbID"] = result[6]
-        movie_something.append(babynames_metadata)
-
-    for result in Fresults:
-        babynames_metadata = {}
-        babynames_metadata["Id"] = result[0]
-        babynames_metadata["Name"] = result[1]
-        babynames_metadata["Year"] = int(result[2])
-        babynames_metadata["Gender"] = result[3]
-        babynames_metadata["Count"] = int(result[4])
-        babynames_metadata["Rank"] = int(result[5])
-        Fbaby_something.append(babynames_metadata)
-    for result in Mresults:
-        babynames_metadata = {}
-        babynames_metadata["Id"] = result[0]
-        babynames_metadata["Name"] = result[1]
-        babynames_metadata["Year"] = int(result[2])
-        babynames_metadata["Gender"] = result[3]
-        babynames_metadata["Count"] = int(result[4])
-        babynames_metadata["Rank"] = int(result[5])
-        Mbaby_something.append(babynames_metadata)
-    # return jsonify(baby_something)
-    fcounter = []
-    mcounter = []
-
-    fname = []
-    mname = []
-    # print(MMmovies)
-    for i in range(len(Fbaby_something)):
-        Fname = Fbaby_something[i]["Name"]
-        count = 0
-        for j in MMmovies:
-
-            
-            k = j.replace(",", " ")
-            k = k.replace("/", " ")
-            k = k.replace("(", " ")
-            k = k.replace(")", " ")
-            k = str(k).split(" ")
-            # .split(",").split("/").split("(").split(")").split(".")
-            # k = k.split(" ")
-            # print(k)
-            if Fname in k:
-                count = count +1
-
-        fcounter.append(count)
-        fname.append(Fname)
-    femalegraphdata = {
-        "Names": fname,
-        "Number": fcounter
-}
-    for i in range(len(Mbaby_something)):
-        Mname = Mbaby_something[i]["Name"]
-        count = 0
-        for j in MMmovies:
-
-            
-            k = j.replace(",", " ")
-            k = k.replace("/", " ")
-            k = k.replace("(", " ")
-            k = k.replace(")", " ")
-            k = str(k).split(" ")
-            # .split(",").split("/").split("(").split(")").split(".")
-            # k = k.split(" ")
-            # print(k)
-            if Mname in k:
-                count = count +1
-
-        mcounter.append(count)
-        mname.append(Mname)
-    malegraphdata = {
-        "Names": mname,
-        "Number": mcounter
-}
-
-    print(malegraphdata)
-    print(femalegraphdata)
-    return jsonify(malegraphdata)
-        # fcounter["Name"] = fname
-        # fcounter["Number"] = Count
-        # count = 0
-        # for k in movie_something["Characters"]:
-        #     if mname in j:
-        #         count = count +1
 
 
 
